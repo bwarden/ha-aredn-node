@@ -6,7 +6,7 @@
     "description": "REDACTED",
     "board_id": "MikroTik RouterBOARD LHG 2nD-XL",
     "firmware_mfg": "AREDN",
-    "firmware_version": "babel-20251212-43437aba",
+    "firmware_version": "4.26.7.0",
     "mesh_gateway": false,
     "mesh_supernode": false
   },
