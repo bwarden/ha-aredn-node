@@ -1,6 +1,6 @@
 # Home Assistant AREDN Node Integration
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg)](https://github.com/hacs/integration)
+[![marketplace_badge](https://img.shields.io/badge/Home%20Assistant-Marketplace-blue.svg)](https://www.home-assistant.io/integrations/#custom)
 
 This is a custom integration for [Home Assistant](https://www.home-assistant.io/) to monitor nodes on an [Amateur Radio Emergency Data Network (AREDN)](https://www.arednmesh.org/).
 
@@ -25,10 +25,10 @@ This integration uses the `ucode` API endpoint for retrieving data. At this time
 
 ## Installation
 
-The recommended way to install this integration is through the Home Assistant Community Store (HACS).
+This integration is not part of the default Marketplace catalog, so add the repository manually:
 
-1. [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bwarden&repository=hacs-aredn-node&category=Integrations)
-2. Download the integration.
+1. Open **Settings > Devices & Services > Marketplace** (or HACS), choose **Custom repositories**, and add `https://github.com/bwarden/ha-aredn-node` (category: Integration).
+2. Install **AREDN Node** from the Marketplace.
 3. Restart Home Assistant.
 
 ## Configuration
@@ -42,6 +42,12 @@ The recommended way to install this integration is through the Home Assistant Co
 ## Sensors
 
 This integration creates the following entities for each configured node. The node's name will be prepended to all entity names (e.g., `MYCALL-MYNODE Reachable`).
+
+### Update
+
+| Entity | Description |
+| :--- | :--- |
+| **Firmware Update** | Shows the currently installed firmware version and the latest published AREDN firmware version. There is no mechanism to perform the update from Home Assistant. |
 
 ### Binary Sensor
 
