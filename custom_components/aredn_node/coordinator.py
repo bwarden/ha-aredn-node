@@ -17,16 +17,20 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import ArednNodeApiClientError
-from .const import AREDN_FIRMWARE_CONFIG_URL, CONF_FIRMWARE_CONFIG_URL
+from .const import (
+    AREDN_FIRMWARE_CONFIG_REFRESH_INTERVAL,
+    AREDN_FIRMWARE_CONFIG_URL,
+    CONF_FIRMWARE_CONFIG_URL,
+)
 
 if TYPE_CHECKING:
     from .data import ArednNodeConfigEntry
 
 # Shared across all config entries/instances in this process: the published
-# firmware version changes at most hourly, so we never fetch it more often.
+# firmware version changes infrequently, so we never fetch it more often than
+# AREDN_FIRMWARE_CONFIG_REFRESH_INTERVAL.
 # Keyed by URL so different configured endpoints don't share a cached value.
 _LATEST_FIRMWARE_CACHE: dict[str, dict[str, Any]] = {}
-_LATEST_FIRMWARE_TTL = 3600.0
 
 
 def _split_hostish(raw: str) -> tuple[str, int | None]:
@@ -106,7 +110,7 @@ class ArednNodeDataUpdateCoordinator(DataUpdateCoordinator):
         now = time.monotonic()
         if (
             cache["version"] is not None
-            and now - cache["fetched"] < _LATEST_FIRMWARE_TTL
+            and now - cache["fetched"] < AREDN_FIRMWARE_CONFIG_REFRESH_INTERVAL
         ):
             return cache["version"]
 
