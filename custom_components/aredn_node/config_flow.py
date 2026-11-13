@@ -1,3 +1,7 @@
+# Copyright (c) 2025-2026 Brett T. Warden
+#
+# SPDX-License-Identifier: MIT
+
 """Adds config flow for Blueprint."""
 
 from __future__ import annotations

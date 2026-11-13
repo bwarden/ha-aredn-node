@@ -1,3 +1,7 @@
+# Copyright (c) 2025-2026 Brett T. Warden
+#
+# SPDX-License-Identifier: MIT
+
 """Constants for the AREDN Node integration."""
 
 from logging import Logger, getLogger

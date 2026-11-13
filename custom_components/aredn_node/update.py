@@ -1,3 +1,7 @@
+# Copyright (c) 2025-2026 Brett T. Warden
+#
+# SPDX-License-Identifier: MIT
+
 """Update platform for AREDN Node integration."""
 
 from __future__ import annotations
