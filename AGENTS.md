@@ -6,6 +6,8 @@
   prefix, and a verbose body explaining *why* the change is made.
 - One functional change per commit; do not mix unrelated fixes.
 - Describe the change and its rationale in detail in the commit message.
+- Include relevant error messages and tracebacks verbatim when the change
+  fixes a specific failure, so the fix is discoverable by searching logs.
 
 Custom integration (`custom_components/aredn_node`) for managing AREDN nodes.
 
