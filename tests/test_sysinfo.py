@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from unittest.mock import MagicMock
 
-from custom_components.aredn_node.sensor import ArednNodeSensorEntityDescription
 from custom_components.aredn_node.update import ArednNodeFirmwareUpdate
 
 
@@ -27,8 +27,6 @@ def test_sysinfo_node_count():
 
 
 def test_update_entity_has_update():
-    from unittest.mock import MagicMock
-
     coordinator = MagicMock()
     coordinator.data = _load_sysinfo()
     coordinator.data["latest_firmware_version"] = "4.26.10.0"
@@ -37,5 +35,5 @@ def test_update_entity_has_update():
     entity = ArednNodeFirmwareUpdate.__new__(ArednNodeFirmwareUpdate)
     entity.coordinator = coordinator
     assert entity.has_update is True
-    assert entity.installed_version == "babel-20251212-43437aba"
+    assert entity.installed_version == "4.26.7.0"
     assert entity.latest_version == "4.26.10.0"
