@@ -9,7 +9,6 @@ import pytest
 
 from custom_components.aredn_node.coordinator import (
     _LATEST_FIRMWARE_CACHE,
-    _LATEST_FIRMWARE_TTL,
     ArednNodeDataUpdateCoordinator,
 )
 
@@ -39,9 +38,7 @@ async def test_fetch_latest_firmware_version_parses_default_version():
 
     response = AsyncMock()
     response.raise_for_status = MagicMock()
-    response.text = AsyncMock(
-        return_value='default_version: "4.26.10.0",'
-    )
+    response.text = AsyncMock(return_value='default_version: "4.26.10.0",')
     response.__aenter__ = AsyncMock(return_value=response)
     response.__aexit__ = AsyncMock(return_value=None)
 

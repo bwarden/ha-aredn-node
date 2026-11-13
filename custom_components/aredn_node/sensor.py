@@ -182,7 +182,7 @@ ENTITY_DESCRIPTIONS: tuple[ArednNodeSensorEntityDescription, ...] = (
         state_class=SensorStateClass.MEASUREMENT,
         value_fn=lambda data: len(data.get("link_info", {})),
         attr_fn=lambda data: {
-            "links": [v.get("hostname") for v in data.get("link_info", {}).values()]
+            "links": [v.get("hostname") for v in data.get("link_info", {}).values()],
         },
     ),
     ArednNodeSensorEntityDescription(
@@ -233,7 +233,8 @@ async def async_setup_entry(
         rf_peers.update(entry.data["rf_peers"])
 
     hass.config_entries.async_update_entry(
-        entry, data={**entry.data, "rf_peers": list(rf_peers)}
+        entry,
+        data={**entry.data, "rf_peers": list(rf_peers)},
     )
 
     entities.extend(
@@ -269,14 +270,15 @@ async def async_setup_entry(
 
     # This function is not a coroutine and returns a boolean.
     hass.config_entries.async_update_entry(
-        entry, data={**entry.data, "link_types": list(link_types)}
+        entry,
+        data={**entry.data, "link_types": list(link_types)},
     )
 
     entities.extend(
         [
             ArednNodeLinkTypeSensor(coordinator=coordinator, link_type=link_type)
             for link_type in link_types
-        ]
+        ],
     )
 
     # Create sensors for each interface, disabled by default
@@ -393,7 +395,7 @@ class ArednNodeLinkTypeSensor(ArednNodeEntity, SensorEntity):
                 v.get("hostname")
                 for v in link_info.values()
                 if v.get("linkType") == self._link_type
-            ]
+            ],
         }
 
 

@@ -27,7 +27,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the device tracker platform."""
     async_add_entities(
-        [ArednNodeDeviceTracker(coordinator=entry.runtime_data.coordinator)]
+        [ArednNodeDeviceTracker(coordinator=entry.runtime_data.coordinator)],
     )
 
 

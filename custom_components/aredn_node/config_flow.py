@@ -84,19 +84,17 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(
-        config_entry: config_entries.ConfigEntry,
+        config_entry: config_entries.ConfigEntry,  # noqa: ARG004
     ) -> ArednNodeOptionsFlowHandler:
         """Get the options flow for this handler."""
-        return ArednNodeOptionsFlowHandler(config_entry)
+        return ArednNodeOptionsFlowHandler()
 
     async def async_step_reconfigure(
-        self, user_input: dict[str, Any] | None = None
+        self,
+        user_input: dict[str, Any] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """Handle a reconfiguration flow initialized by the user."""
-        entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
-        if not entry:
-            return self.async_abort(reason="unknown_error")
-
+        entry = self._get_reconfigure_entry()
         errors: dict[str, str] = {}
 
         if user_input:
@@ -120,27 +118,28 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.exception(e)
                 errors["base"] = "unknown"
             else:
-                # Keep UI as one field (CONF_HOST), but persist ssl/port too.
-                updated = {
-                    **entry.data,
-                    CONF_HOST: stored_host,
-                    CONF_SSL: ssl,
-                    CONF_PORT: port,
-                }
-                self.hass.config_entries.async_update_entry(entry, data=updated)
-                await self.hass.config_entries.async_reload(entry.entry_id)
-                return self.async_abort(reason="reconfigure_successful")
+                return self.async_update_reload_and_abort(
+                    entry,
+                    data_updates={
+                        CONF_HOST: stored_host,
+                        CONF_SSL: ssl,
+                        CONF_PORT: port,
+                    },
+                )
 
         return self.async_show_form(
             step_id="reconfigure",
-            data_schema=vol.Schema(
-                {
-                    vol.Required(
-                        CONF_HOST, default=entry.data.get(CONF_HOST)
-                    ): selector.TextSelector(
-                        selector.TextSelectorConfig(type=selector.TextSelectorType.TEXT)
-                    ),
-                }
+            data_schema=self.add_suggested_values_to_schema(
+                vol.Schema(
+                    {
+                        vol.Required(CONF_HOST): selector.TextSelector(
+                            selector.TextSelectorConfig(
+                                type=selector.TextSelectorType.TEXT,
+                            ),
+                        ),
+                    },
+                ),
+                entry.data,
             ),
             errors=errors,
         )
@@ -157,7 +156,8 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Add/update the node in our discovered list, prioritizing specific hostnames.
         if node_name not in discovered_nodes or "localnode" in discovered_nodes.get(
-            node_name, ""
+            node_name,
+            "",
         ):
             discovered_nodes[node_name] = result["host"]
 
@@ -245,7 +245,7 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                         CONF_HOST: stored_host,
                         CONF_SSL: ssl,
                         CONF_PORT: port,
-                    }
+                    },
                 )
 
                 return self.async_create_entry(
@@ -267,7 +267,7 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     options=discovered_hosts_list,
                     mode=selector.SelectSelectorMode.DROPDOWN,
                     custom_value=True,  # user can type https://host:port here too
-                )
+                ),
             )
         else:
             schema[vol.Required(CONF_HOST)] = selector.TextSelector(
@@ -346,17 +346,9 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 class ArednNodeOptionsFlowHandler(config_entries.OptionsFlow):
     """Options flow for AREDN Node."""
 
-    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        """Initialize options flow."""
-        self._config_entry = config_entry
-
-    @property
-    def config_entry(self) -> config_entries.ConfigEntry:
-        """Return the config entry linked to this options flow."""
-        return self._config_entry
-
     async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
+        self,
+        user_input: dict[str, Any] | None = None,
     ) -> config_entries.ConfigFlowResult:
         """Manage the firmware download URL option."""
         if user_input is not None:
@@ -365,7 +357,8 @@ class ArednNodeOptionsFlowHandler(config_entries.OptionsFlow):
         current = self.config_entry.options.get(
             CONF_FIRMWARE_CONFIG_URL,
             self.config_entry.data.get(
-                CONF_FIRMWARE_CONFIG_URL, AREDN_FIRMWARE_CONFIG_URL
+                CONF_FIRMWARE_CONFIG_URL,
+                AREDN_FIRMWARE_CONFIG_URL,
             ),
         )
 
@@ -377,8 +370,10 @@ class ArednNodeOptionsFlowHandler(config_entries.OptionsFlow):
                         CONF_FIRMWARE_CONFIG_URL,
                         default=current,
                     ): selector.TextSelector(
-                        selector.TextSelectorConfig(type=selector.TextSelectorType.TEXT)
+                        selector.TextSelectorConfig(
+                            type=selector.TextSelectorType.TEXT
+                        ),
                     ),
-                }
+                },
             ),
         )

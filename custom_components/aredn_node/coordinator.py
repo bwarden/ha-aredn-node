@@ -100,7 +100,8 @@ class ArednNodeDataUpdateCoordinator(DataUpdateCoordinator):
         """
         url = self._firmware_config_url()
         cache = _LATEST_FIRMWARE_CACHE.setdefault(
-            url, {"version": None, "fetched": 0.0}
+            url,
+            {"version": None, "fetched": 0.0},
         )
         now = time.monotonic()
         if (

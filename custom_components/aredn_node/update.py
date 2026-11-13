@@ -31,7 +31,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the update platform."""
     async_add_entities(
-        [ArednNodeFirmwareUpdate(coordinator=entry.runtime_data.coordinator)]
+        [ArednNodeFirmwareUpdate(coordinator=entry.runtime_data.coordinator)],
     )
 
 

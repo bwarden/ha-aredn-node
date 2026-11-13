@@ -40,7 +40,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up the binary sensor platform."""
     async_add_entities(
-        [ArednNodeReachableSensor(coordinator=entry.runtime_data.coordinator)]
+        [ArednNodeReachableSensor(coordinator=entry.runtime_data.coordinator)],
     )
 
 
