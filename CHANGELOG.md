@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.4.1
+
+- Fix options flow crash when opening integration options.
+
 ## v1.4.0
 
 - Fix deprecated `TrackerEntity` import for current Home Assistant.
