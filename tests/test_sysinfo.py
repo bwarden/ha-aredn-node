@@ -18,7 +18,7 @@ def _load_sysinfo() -> dict:
 
 def test_sysinfo_firmware_version():
     data = _load_sysinfo()
-    assert data["node_details"]["firmware_version"] == "babel-20251212-43437aba"
+    assert data["node_details"]["firmware_version"] == "4.26.7.0"
 
 
 def test_sysinfo_node_count():
