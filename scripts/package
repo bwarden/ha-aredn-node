@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+VERSION="${1:-$(python3 -c "import json; print(json.load(open('custom_components/aredn_node/manifest.json'))['version'])")}"
+OUT="aredn_node-${VERSION}.zip"
+
+cd custom_components
+zip -r "../${OUT}" aredn_node
+cd ..
+
+echo "Created ${OUT}"
