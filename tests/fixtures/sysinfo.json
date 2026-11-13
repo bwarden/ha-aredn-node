@@ -1,0 +1,53 @@
+{
+  "api_version": "2.0",
+  "node": "REDACTED-NODE",
+  "node_details": {
+    "model": "MikroTik RouterBOARD LHG 2nD-XL",
+    "description": "REDACTED",
+    "board_id": "MikroTik RouterBOARD LHG 2nD-XL",
+    "firmware_mfg": "AREDN",
+    "firmware_version": "babel-20251212-43437aba",
+    "mesh_gateway": false,
+    "mesh_supernode": false
+  },
+  "tunnels": {
+    "active_tunnel_count": 0
+  },
+  "lat": 0.0,
+  "lon": 0.0,
+  "gridsquare": "REDACTED",
+  "meshrf": {
+    "status": "on",
+    "ssid": "aredn",
+    "freq": 2397,
+    "chanbw": 10,
+    "antenna": {
+      "gain": 16,
+      "beamwidth": 10
+    }
+  },
+  "sysinfo": {
+    "freememory": 12345,
+    "loads": [0.1, 0.2, 0.3],
+    "uptime": "10 days, 2:30"
+  },
+  "interfaces": [
+    {
+      "name": "br-lan",
+      "ip": "10.0.0.1"
+    }
+  ],
+  "link_info": {
+    "10.0.0.2": {
+      "hostname": "REDACTED-HOST",
+      "linkType": "RF",
+      "signal": -65,
+      "noise": -90
+    }
+  },
+  "nodes": [
+    {
+      "node": "REDACTED-NODE2"
+    }
+  ]
+}
