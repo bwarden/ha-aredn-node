@@ -2,17 +2,25 @@
 
 from __future__ import annotations
 
+import re
 import socket
+import time
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urlsplit
 
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SSL
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import ArednNodeApiClientError
 
 if TYPE_CHECKING:
     from .data import ArednNodeConfigEntry
+
+# Shared across all config entries/instances in this process: the published
+# firmware version changes at most hourly, so we never fetch it more often.
+_LATEST_FIRMWARE_CACHE: dict[str, Any] = {"version": None, "fetched": 0.0}
+_LATEST_FIRMWARE_TTL = 3600.0
 
 
 def _split_hostish(raw: str) -> tuple[str, int | None]:
@@ -70,6 +78,37 @@ class ArednNodeDataUpdateCoordinator(DataUpdateCoordinator):
         except OSError:
             return None
 
+    async def _async_fetch_latest_firmware_version(self) -> str | None:
+        """
+        Fetch the default firmware version from the AREDN downloads site.
+
+        At most one fetch per hour is performed across all instances.
+        """
+        now = time.monotonic()
+        if (
+            _LATEST_FIRMWARE_CACHE["version"] is not None
+            and now - _LATEST_FIRMWARE_CACHE["fetched"] < _LATEST_FIRMWARE_TTL
+        ):
+            return _LATEST_FIRMWARE_CACHE["version"]
+
+        # Mark the attempt time up front so concurrent callers don't all fetch.
+        _LATEST_FIRMWARE_CACHE["fetched"] = now
+
+        url = "http://downloads.arednmesh.org/afs/www/config.js"
+        try:
+            session = async_get_clientsession(self.hass)
+            async with session.get(url, timeout=10) as response:
+                response.raise_for_status()
+                text = await response.text()
+        except Exception:  # noqa: BLE001
+            return _LATEST_FIRMWARE_CACHE["version"]
+
+        match = re.search(r'default_version:\s*"([^"]+)"', text)
+        version = match.group(1) if match else None
+        if version is not None:
+            _LATEST_FIRMWARE_CACHE["version"] = version
+        return _LATEST_FIRMWARE_CACHE["version"]
+
     async def _async_update_data(self) -> Any:
         """Update data via library."""
         client = self.config_entry.runtime_data.client
@@ -110,6 +149,15 @@ class ArednNodeDataUpdateCoordinator(DataUpdateCoordinator):
         try:
             # Client will decide scheme/verification based on how it was constructed
             # (ssl/port from entry), but we still pass an override host for discovery/IP caching.
-            return await client.async_get_data(host=target_host)
+            data = await client.async_get_data(host=target_host)
         except ArednNodeApiClientError as exception:
             raise UpdateFailed(exception) from exception
+
+        # Fetch the latest published firmware version (best effort, cached on failure).
+        latest_version = await self._async_fetch_latest_firmware_version()
+        if latest_version is not None:
+            data["latest_firmware_version"] = latest_version
+        elif "latest_firmware_version" not in data and self.data:
+            data["latest_firmware_version"] = self.data.get("latest_firmware_version")
+
+        return data
