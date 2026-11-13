@@ -4,8 +4,11 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-VERSION="${1:-$(python3 -c "import json; print(json.load(open('custom_components/aredn_node/manifest.json'))['version'])")}"
-OUT="aredn_node-${VERSION}.zip"
+if [ -n "${1:-}" ]; then
+    OUT="aredn_node-${1}.zip"
+else
+    OUT="aredn_node.zip"
+fi
 
 zip -r "${OUT}" custom_components/aredn_node -x '*/__pycache__/*' '*/__pycache__'
 
