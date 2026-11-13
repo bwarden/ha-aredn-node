@@ -11,6 +11,7 @@ import netifaces
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT, CONF_SSL
+from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_create_clientsession
 from slugify import slugify
@@ -22,7 +23,12 @@ from .api import (
     ArednNodeApiClientError,
     ArednNodeApiClientResponseError,
 )
-from .const import DOMAIN, LOGGER
+from .const import (
+    AREDN_FIRMWARE_CONFIG_URL,
+    CONF_FIRMWARE_CONFIG_URL,
+    DOMAIN,
+    LOGGER,
+)
 
 
 def _parse_host_input(raw: str) -> tuple[str, bool, int | None]:
@@ -70,6 +76,14 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for AREDN Node."""
 
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> ArednNodeOptionsFlowHandler:
+        """Get the options flow for this handler."""
+        return ArednNodeOptionsFlowHandler(config_entry)
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
@@ -323,3 +337,39 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
         # Add host to data for discovery/debug; keep original input as the "host" we probed
         data["host"] = host_input
         return data
+
+
+class ArednNodeOptionsFlowHandler(config_entries.OptionsFlow):
+    """Options flow for AREDN Node."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize options flow."""
+        self.config_entry = config_entry
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Manage the firmware download URL option."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        current = self.config_entry.options.get(
+            CONF_FIRMWARE_CONFIG_URL,
+            self.config_entry.data.get(
+                CONF_FIRMWARE_CONFIG_URL, AREDN_FIRMWARE_CONFIG_URL
+            ),
+        )
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_FIRMWARE_CONFIG_URL,
+                        default=current,
+                    ): selector.TextSelector(
+                        selector.TextSelectorConfig(type=selector.TextSelectorType.TEXT)
+                    ),
+                }
+            ),
+        )

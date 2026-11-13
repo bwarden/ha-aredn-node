@@ -9,6 +9,8 @@ LOGGER: Logger = getLogger(__package__)
 DOMAIN = "aredn_node"
 MANUFACTURER = "Amateur Radio Emergency Data Network"
 AREDN_FIRMWARE_CONFIG_URL = "http://downloads.arednmesh.org/afs/www/config.js"
+
+CONF_FIRMWARE_CONFIG_URL = "firmware_config_url"
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
     Platform.BINARY_SENSOR,

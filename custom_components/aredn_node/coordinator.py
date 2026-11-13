@@ -13,14 +13,15 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import ArednNodeApiClientError
-from .const import AREDN_FIRMWARE_CONFIG_URL
+from .const import AREDN_FIRMWARE_CONFIG_URL, CONF_FIRMWARE_CONFIG_URL
 
 if TYPE_CHECKING:
     from .data import ArednNodeConfigEntry
 
 # Shared across all config entries/instances in this process: the published
 # firmware version changes at most hourly, so we never fetch it more often.
-_LATEST_FIRMWARE_CACHE: dict[str, Any] = {"version": None, "fetched": 0.0}
+# Keyed by URL so different configured endpoints don't share a cached value.
+_LATEST_FIRMWARE_CACHE: dict[str, dict[str, Any]] = {}
 _LATEST_FIRMWARE_TTL = 3600.0
 
 
@@ -79,36 +80,47 @@ class ArednNodeDataUpdateCoordinator(DataUpdateCoordinator):
         except OSError:
             return None
 
+    def _firmware_config_url(self) -> str:
+        """Return the configured firmware config URL."""
+        return (
+            self.config_entry.options.get(CONF_FIRMWARE_CONFIG_URL)
+            or self.config_entry.data.get(CONF_FIRMWARE_CONFIG_URL)
+            or AREDN_FIRMWARE_CONFIG_URL
+        )
+
     async def _async_fetch_latest_firmware_version(self) -> str | None:
         """
-        Fetch the default firmware version from the AREDN downloads site.
+        Fetch the default firmware version from the configured URL.
 
-        At most one fetch per hour is performed across all instances.
+        At most one fetch per hour is performed per URL across all instances.
         """
+        url = self._firmware_config_url()
+        cache = _LATEST_FIRMWARE_CACHE.setdefault(
+            url, {"version": None, "fetched": 0.0}
+        )
         now = time.monotonic()
         if (
-            _LATEST_FIRMWARE_CACHE["version"] is not None
-            and now - _LATEST_FIRMWARE_CACHE["fetched"] < _LATEST_FIRMWARE_TTL
+            cache["version"] is not None
+            and now - cache["fetched"] < _LATEST_FIRMWARE_TTL
         ):
-            return _LATEST_FIRMWARE_CACHE["version"]
+            return cache["version"]
 
         # Mark the attempt time up front so concurrent callers don't all fetch.
-        _LATEST_FIRMWARE_CACHE["fetched"] = now
+        cache["fetched"] = now
 
-        url = AREDN_FIRMWARE_CONFIG_URL
         try:
             session = async_get_clientsession(self.hass)
             async with session.get(url, timeout=10) as response:
                 response.raise_for_status()
                 text = await response.text()
         except Exception:  # noqa: BLE001
-            return _LATEST_FIRMWARE_CACHE["version"]
+            return cache["version"]
 
         match = re.search(r'default_version:\s*"([^"]+)"', text)
         version = match.group(1) if match else None
         if version is not None:
-            _LATEST_FIRMWARE_CACHE["version"] = version
-        return _LATEST_FIRMWARE_CACHE["version"]
+            cache["version"] = version
+        return cache["version"]
 
     async def _async_update_data(self) -> Any:
         """Update data via library."""
