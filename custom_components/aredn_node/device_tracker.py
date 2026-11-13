@@ -4,8 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from homeassistant.components.device_tracker import SourceType
-from homeassistant.components.device_tracker.config_entry import TrackerEntity
+from homeassistant.components.device_tracker import SourceType, TrackerEntity
 
 from .entity import ArednNodeEntity
 
