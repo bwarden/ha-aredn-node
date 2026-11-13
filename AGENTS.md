@@ -1,5 +1,12 @@
 # AREDN Node Home Assistant integration
 
+## Commit style
+
+- Use kernel-style commits: imperative mood subject line, optional subsystem
+  prefix, and a verbose body explaining *why* the change is made.
+- One functional change per commit; do not mix unrelated fixes.
+- Describe the change and its rationale in detail in the commit message.
+
 Custom integration (`custom_components/aredn_node`) for managing AREDN nodes.
 
 ## Dependency notes
