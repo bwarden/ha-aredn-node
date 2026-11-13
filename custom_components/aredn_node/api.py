@@ -12,7 +12,6 @@ from typing import Any
 from urllib.parse import urlsplit
 
 import aiohttp
-import async_timeout
 from yarl import URL
 
 
@@ -157,7 +156,7 @@ class ArednNodeApiClient:
         """Make an API request and return JSON."""
         if url.host:
             try:
-                async with async_timeout.timeout(self._timeout):
+                async with asyncio.timeout(self._timeout):
                     loop = asyncio.get_running_loop()
                     await loop.run_in_executor(None, socket.getaddrinfo, url.host, None)
             except (socket.gaierror, OSError) as exception:
@@ -168,7 +167,7 @@ class ArednNodeApiClient:
                 raise ArednNodeApiClientDnsError(msg) from exception
 
         try:
-            async with async_timeout.timeout(self._timeout):
+            async with asyncio.timeout(self._timeout):
                 # aiohttp `ssl=`:
                 # - For https: pass True to verify, False to skip verification (self-signed)
                 # - For http: pass None
