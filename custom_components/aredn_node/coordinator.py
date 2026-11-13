@@ -13,6 +13,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import ArednNodeApiClientError
+from .const import AREDN_FIRMWARE_CONFIG_URL
 
 if TYPE_CHECKING:
     from .data import ArednNodeConfigEntry
@@ -94,7 +95,7 @@ class ArednNodeDataUpdateCoordinator(DataUpdateCoordinator):
         # Mark the attempt time up front so concurrent callers don't all fetch.
         _LATEST_FIRMWARE_CACHE["fetched"] = now
 
-        url = "http://downloads.arednmesh.org/afs/www/config.js"
+        url = AREDN_FIRMWARE_CONFIG_URL
         try:
             session = async_get_clientsession(self.hass)
             async with session.get(url, timeout=10) as response:
