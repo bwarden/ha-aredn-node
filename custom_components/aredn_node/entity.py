@@ -21,6 +21,11 @@ class ArednNodeEntity(CoordinatorEntity[ArednNodeDataUpdateCoordinator]):
         super().__init__(coordinator)
 
     @property
+    def available(self) -> bool:
+        """Keep entities available with last known data during outages."""
+        return self.coordinator.data is not None
+
+    @property
     def device_info(self) -> DeviceInfo:
         """Return device information about this entity."""
         node_details = self.coordinator.data.get("node_details", {})
