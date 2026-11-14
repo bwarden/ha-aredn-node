@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.5.1
+
+- Re-release with corrected manifest version (v1.5.0 shipped with a stale
+  v1.4.1 version string).
+
 ## v1.5.0
 
 - Fix options flow crash when opening integration options (property
