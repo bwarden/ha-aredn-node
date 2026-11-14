@@ -84,10 +84,10 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(
-        config_entry: config_entries.ConfigEntry,  # noqa: ARG004
+        config_entry: config_entries.ConfigEntry,
     ) -> ArednNodeOptionsFlowHandler:
         """Get the options flow for this handler."""
-        return ArednNodeOptionsFlowHandler()
+        return ArednNodeOptionsFlowHandler(config_entry)
 
     async def async_step_reconfigure(
         self,
@@ -345,6 +345,17 @@ class ArednNodeFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
 class ArednNodeOptionsFlowHandler(config_entries.OptionsFlow):
     """Options flow for AREDN Node."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry | None = None) -> None:
+        """Initialize options flow."""
+        self._config_entry = config_entry
+
+    @property
+    def config_entry(self) -> config_entries.ConfigEntry:
+        """Return the config entry linked to this options flow."""
+        if self._config_entry is not None:
+            return self._config_entry
+        return super().config_entry
 
     async def async_step_init(
         self,
